@@ -1,0 +1,9 @@
+---
+description: Status updates narrate recent actions and next steps; must reflect real operations in the same turn.
+alwaysApply: false
+enabled: true
+updatedAt: 2025-10-30T03:19:30.100Z
+provider: 
+---
+
+我已定位到工作流编辑器的实现（ReactFlow：`client/src/components/Workflow/*`）。现在将实现：在 `WorkflowNode` 句柄悬停时，通过全局事件在 `Canvas` 中显示跟随光标的节点创建菜单，选择后创建节点并自动连线；左键在句柄上仍保持拖拽连线。接下来我会编辑 `WorkflowNode.tsx`、`Canvas.tsx` 和 `Workflow.css` 来加入菜单与事件处理。

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试ERD功能</title>
+</head>
+<body>
+    <h1>测试ERD返回功能</h1>
+    <button onclick="setTestSql()">设置测试SQL到localStorage</button>
+    <button onclick="clearTestSql()">清除测试SQL</button>
+    <button onclick="checkSql()">检查localStorage中的SQL</button>
+    <button onclick="goToApp()">跳转到应用</button>
+    
+    <div id="output"></div>
+    
+    <script>
+        function setTestSql() {
+            const testSql = `-- ERD生成的测试SQL
+SELECT 
+    o.id,
+    o.order_date,
+    o.total_amount,
+    c.customer_name
+FROM orders o
+JOIN customers c ON o.customer_id = c.id
+WHERE o.order_date >= CURRENT_DATE - INTERVAL '30 days'
+ORDER BY o.total_amount DESC
+LIMIT 10;`;
+            
+            localStorage.setItem('erd_generated_sql', testSql);
+            document.getElementById('output').innerHTML = '<p style="color: green;">测试SQL已设置到localStorage</p>';
+        }
+        
+        function clearTestSql() {
+            localStorage.removeItem('erd_generated_sql');
+            document.getElementById('output').innerHTML = '<p style="color: red;">测试SQL已清除</p>';
+        }
+        
+        function checkSql() {
+            const sql = localStorage.getItem('erd_generated_sql');
+            if (sql) {
+                document.getElementById('output').innerHTML = '<p>当前localStorage中的SQL:</p><pre>' + sql + '</pre>';
+            } else {
+                document.getElementById('output').innerHTML = '<p style="color: red;">localStorage中没有SQL</p>';
+            }
+        }
+        
+        function goToApp() {
+            window.open('http://localhost:5175/', '_blank');
+        }
+    </script>
+</body>
+</html>

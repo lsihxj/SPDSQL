@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ERD 修改测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>ERD 修改测试页面</h1>
+    
+    <div class="test-section">
+        <h2>1. 测试字体大小变化</h2>
+        <p>请访问实体关系图页面，检查：</p>
+        <ul>
+            <li>卡片宽度是否变为120px（很窄）</li>
+            <li>表头标题字体是否变为0.4rem（很小）</li>
+            <li>字段名字体是否变为0.4rem（很小）</li>
+            <li>页面标题是否显示"数据表实体关系图 (已更新)"</li>
+        </ul>
+        <button onclick="window.location.hash='#/erd'">打开实体关系图</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 测试滚轮缩放</h2>
+        <p>在实体关系图页面：</p>
+        <ul>
+            <li>添加一些表到画布</li>
+            <li>在画布空白区域滚动鼠标滚轮</li>
+            <li>应该可以放大/缩小画布</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 测试新页签创建</h2>
+        <p>在实体关系图页面：</p>
+        <ul>
+            <li>添加表并选择字段</li>
+            <li>点击"生成SQL"</li>
+            <li>点击"插入编辑器并返回"</li>
+            <li>应该创建新页签而不是覆盖现有页签</li>
+        </ul>
+        <button onclick="testNewTab()">测试新页签功能</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 测试关闭按钮</h2>
+        <p>在实体关系图页面：</p>
+        <ul>
+            <li>添加表到画布</li>
+            <li>检查每个表卡片右上角是否有X按钮</li>
+            <li>点击X按钮应该关闭该表</li>
+        </ul>
+    </div>
+    
+    <script>
+        function testNewTab() {
+            // 模拟ERD生成SQL
+            const testSql = `-- ERD生成SQL (${new Date().toLocaleString()}) [ID:${Date.now()}]
+SELECT users.id, users.name, orders.total
+FROM public.users
+INNER JOIN public.orders ON users.id = orders.user_id;`;
+            
+            localStorage.setItem('erd_generated_sql', testSql);
+            localStorage.setItem('erd_create_new_tab', 'true');
+            localStorage.setItem('erd_timestamp', Date.now().toString());
+            
+            console.log('测试SQL已设置到localStorage');
+            console.log('SQL内容:', testSql.substring(0, 100) + '...');
+            
+            // 跳转回主页面
+            window.location.hash = '';
+        }
+        
+        // 检查当前状态
+        console.log('当前localStorage状态:');
+        console.log('erd_generated_sql:', localStorage.getItem('erd_generated_sql'));
+        console.log('erd_create_new_tab:', localStorage.getItem('erd_create_new_tab'));
+        console.log('erd_timestamp:', localStorage.getItem('erd_timestamp'));
+    </script>
+</body>
+</html>

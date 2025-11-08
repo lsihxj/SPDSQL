@@ -1,0 +1,343 @@
+import { useRef, useState, useEffect } from 'react'
+import { AppBar, Box, Button, Container, Divider, IconButton, Stack, Tab, Tabs, TextField, Toolbar, Typography } from '@mui/material'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import SaveIcon from '@mui/icons-material/Save'
+import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft'
+import BoltIcon from '@mui/icons-material/Bolt'
+import { Editor, OnMount } from '@monaco-editor/react'
+import axios from 'axios'
+import { api, setAuthToken } from '@/lib/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { format } from 'sql-formatter'
+import Papa from 'papaparse'
+
+function download(filename: string, text: string) {
+  const element = document.createElement('a')
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text))
+  element.setAttribute('download', filename)
+  element.style.display = 'none'
+  document.body.appendChild(element)
+  element.click()
+  document.body.removeChild(element)
+}
+
+export default function App() {
+  const editorRef = useRef<any>(null)
+  const [selectedText, setSelectedText] = useState<string>('')
+  const [instruction, setInstruction] = useState('')
+  const qc = useQueryClient()
+  const [tab, setTab] = useState(0)
+  const [opts, setOpts] = useState(() => {
+    const s = localStorage.getItem('exec_options')
+    return s ? JSON.parse(s) : { readOnly: true, useTransaction: false, maxRows: 1000, timeoutSeconds: 30 }
+  })
+
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [splitPct, setSplitPct] = useState<number>(() => {
+    const s = localStorage.getItem('ai_panel_width_pct')
+    const v = s ? Number(s) : 30 // 右侧默认 30%
+    return Math.min(Math.max(v, 15), 85)
+  })
+  const [isResizing, setIsResizing] = useState(false)
+  const startXRef = useRef(0)
+  const startSplitPctRef = useRef(0)
+  
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isResizing) return
+      const containerWidth = containerRef.current?.getBoundingClientRect().width || 1
+      const delta = e.clientX - startXRef.current
+      const deltaPct = (delta / containerWidth) * 100
+      const minPct = 15
+      const maxPct = 85
+      const nextPct = Math.min(Math.max(startSplitPctRef.current - deltaPct, minPct), maxPct)
+      setSplitPct(nextPct)
+    }
+    const onUp = () => {
+      if (isResizing) {
+        setIsResizing(false)
+        localStorage.setItem('ai_panel_width_pct', String(splitPct))
+      }
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [isResizing, splitPct])
+
+  useEffect(() => {
+    document.body.style.cursor = isResizing ? 'col-resize' : ''
+    document.body.style.userSelect = isResizing ? 'none' : ''
+    return () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [isResizing])
+
+  // 双击分割条重置为 30%
+  const resetSplit = () => {
+    setSplitPct(30)
+    localStorage.setItem('ai_panel_width_pct', '30')
+  }
+
+  const execMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      try {
+        const { data } = await api.post('/api/sql/execute', payload)
+        return data
+      } catch (e: any) {
+        const title = e?.response?.data?.title || e?.response?.data?.error || e?.message || '请求失败'
+        return { success: false, error: title }
+      }
+    }
+  })
+
+  const generateMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { data } = await api.post('/api/sql/generate', payload)
+      return data
+    }
+  })
+
+  const { data: savedList } = useQuery({
+    queryKey: ['saved'],
+    queryFn: async () => (await api.get('/api/queries')).data
+  })
+
+  const onMount: OnMount = (editor) => {
+    editorRef.current = editor
+    editor.onDidChangeCursorSelection(() => {
+      const selection = editor.getSelection()
+      if (!selection) return
+      const model = editor.getModel()
+      if (!model) return
+      const text = model.getValueInRange(selection)
+      setSelectedText(text)
+    })
+  }
+
+  const run = (selected: boolean) => {
+    const sqlText = editorRef.current?.getValue() || ''
+    const payload = {
+      sqlText,
+      runSelectedOnly: selected,
+      selectedText: selected ? selectedText : undefined,
+      readOnly: opts.readOnly,
+      maxRows: opts.maxRows,
+      timeoutSeconds: opts.timeoutSeconds,
+      useTransaction: opts.useTransaction
+    }
+    execMutation.mutate(payload)
+  }
+
+  const formatSql = () => {
+    const sqlText = editorRef.current?.getValue() || ''
+    const formatted = format(sqlText, { language: 'postgresql' })
+    editorRef.current?.setValue(formatted)
+  }
+
+  const saveQuery = async () => {
+    const sqlText = editorRef.current?.getValue() || ''
+    const title = prompt('标题') || '未命名'
+    const description = prompt('描述') || ''
+    await api.post('/api/queries', { title, description, sqlText, tags: [] })
+    qc.invalidateQueries({ queryKey: ['saved'] })
+  }
+
+  const exportCsv = () => {
+    const rows = execMutation.data?.rows || []
+    if (!rows.length) return
+    const csv = Papa.unparse(rows)
+    download('result.csv', csv)
+  }
+
+  const askAI = () => {
+    if (!instruction.trim()) return
+    generateMutation.mutate({ instruction })
+  }
+
+  const insertGenerated = () => {
+    const sql = generateMutation.data?.sql || ''
+    if (!sql) return
+    const model = editorRef.current?.getModel()
+    if (!model) return
+    const pos = editorRef.current!.getPosition()
+    editorRef.current!.executeEdits('insert', [
+      { range: new (window as any).monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column), text: '\n' + sql + '\n' }
+    ])
+  }
+
+  return (
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <AppBar position="static" color="transparent" elevation={0}>
+        <Toolbar>
+          <Typography variant="h6" sx={{ flex: 1 }}>SPDSQL - SQL 智能编写器</Typography>
+          <Stack direction="row" spacing={1}>
+            <Button startIcon={<SaveIcon />} onClick={saveQuery}>保存</Button>
+            <Button onClick={() => setTab(1)}>设置</Button>
+            <Button onClick={() => {
+              const token = localStorage.getItem('token')
+              if (!token) return window.location.reload()
+              localStorage.removeItem('token'); localStorage.removeItem('role');
+              setAuthToken(undefined); window.location.reload()
+            }}>退出</Button>
+          </Stack>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth={false} sx={{ flex: 1, display: 'flex', gap: 0, py: 2 }} ref={containerRef}>
+        {/* 左侧：编辑器区域 */}
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #ddd', borderRadius: 1, overflow: 'hidden' }}>
+          <Stack direction="row" spacing={1} sx={{ p: 1 }}>
+            <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={() => run(false)} disabled={execMutation.isPending}>运行</Button>
+            <Button startIcon={<PlayArrowIcon />} onClick={() => run(true)} disabled={execMutation.isPending}>运行选中</Button>
+            <Button startIcon={<FormatAlignLeftIcon />} onClick={formatSql}>格式化</Button>
+          </Stack>
+          <Divider />
+          {/* 编辑器 + 结果分栏 */}
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* 编辑器区域：在有结果时占 70%，无结果时占满 */}
+            <Box sx={{ flex: execMutation.data ? '0 0 70%' : '1 1 auto' }}>
+              <Editor
+                height="100%"
+                defaultLanguage="pgsql"
+                onMount={onMount}
+                options={{ minimap: { enabled: false }, wordWrap: 'on' }}
+                defaultValue={`-- 在此编写或粘贴 SQL\nSELECT 1 AS id;`}
+              />
+            </Box>
+
+            {/* 结果区域：仅在执行后显示，占底部 30% */}
+            {execMutation.data && (
+              <Box sx={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', borderTop: '1px solid #eee', overflow: 'hidden' }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 1, borderBottom: '1px solid #eee' }}>
+                  <Typography variant="subtitle1">结果</Typography>
+                  {execMutation.data?.rows && <Button size="small" onClick={exportCsv}>导出 CSV</Button>}
+                </Stack>
+                <Box sx={{ flex: 1, overflowY: 'auto', p: 1 }}>
+                  {!execMutation.data?.rows && !execMutation.data?.error && (
+                    <Typography variant="body2" color="text.secondary">
+                      暂无结果，点击上方"运行"后展示执行结果或错误信息。
+                    </Typography>
+                  )}
+                  {execMutation.data?.error && (
+                    <Box>
+                      <Box sx={{ color: 'error.main', whiteSpace: 'pre-wrap' }}>{execMutation.data.error}</Box>
+                      <Button size="small" onClick={async () => {
+                        const sqlText = editorRef.current?.getValue() || ''
+                        const error = execMutation.data?.error || ''
+                        const { data } = await api.post('/api/sql/diagnose', { sql: sqlText, error })
+                        const suggestion = data?.suggestion || ''
+                        if (suggestion) {
+                          const model = editorRef.current?.getModel()
+                          if (model) {
+                            const pos = editorRef.current!.getPosition()
+                            editorRef.current!.executeEdits('insert', [
+                              { range: new (window as any).monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column), text: '\n' + suggestion + '\n' }
+                            ])
+                          }
+                        }
+                      }}>一键回传AI并插入修正SQL</Button>
+                    </Box>
+                  )}
+                  {/* 执行信息 */}
+                  {execMutation.data && !execMutation.data.error && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                      {`${execMutation.data.rows ? `返回 ${execMutation.data.rows.length} 行` : `影响行数：${execMutation.data.affectedRows ?? 0}`}${execMutation.data.duration ? `，耗时：${String(execMutation.data.duration)}` : ''}`}
+                    </Typography>
+                  )}
+
+                  {execMutation.data?.rows && (
+                    <Box>
+                      <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            {Object.keys(execMutation.data.rows[0] || {}).map((k) => (
+                              <th key={k} style={{ textAlign: 'left', borderBottom: '1px solid #eee', padding: 4 }}>{k}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {execMutation.data.rows.map((r: any, i: number) => (
+                            <tr key={i}>
+                              {Object.keys(execMutation.data.rows[0] || {}).map((k) => (
+                                <td key={k} style={{ borderBottom: '1px solid #fafafa', padding: 4 }}>{String(r[k] ?? '')}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* 分割条（15px，可拖动） */}
+        <Box
+          role="separator"
+          aria-orientation="vertical"
+          title="拖动调整面板宽度（双击重置为30%）"
+          sx={{
+            width: 15,
+            cursor: 'col-resize',
+            zIndex: 2001,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: isResizing ? '#ececec' : '#f7f7f7',
+            borderLeft: '1px solid #d0d0d0',
+            borderRight: '1px solid #d0d0d0',
+            transition: 'background 120ms ease',
+            '&:hover': { background: '#ededed' }
+          }}
+          onMouseDown={(e) => { e.preventDefault(); startXRef.current = e.clientX; startSplitPctRef.current = splitPct; setIsResizing(true); }}
+          onDoubleClick={resetSplit}
+        >
+          <Box
+            sx={{
+              width: 8,
+              height: 48,
+              borderRadius: 2,
+              boxShadow: 'inset 0 0 0 1px #c8c8c8',
+              backgroundImage: 'repeating-linear-gradient(to bottom, #bdbdbd 0px, #bdbdbd 6px, #9e9e9e 6px, #9e9e9e 12px)',
+              transition: 'transform 120ms ease, box-shadow 120ms ease',
+              '&:hover': { boxShadow: 'inset 0 0 0 1px #b0b0b0' },
+              ...(isResizing ? { transform: 'scaleX(1.1)' } : {})
+            }}
+          />
+        </Box>
+        {isResizing && <Box sx={{ position: 'fixed', inset: 0, zIndex: 2000, cursor: 'col-resize', pointerEvents: 'none' }} />}
+
+        {/* 右侧：AI 面板 */}
+        <Box sx={{ width: `${splitPct}%`, display: 'flex', flexDirection: 'column', gap: 1, border: '1px solid #ddd', borderRadius: 1, p: 1, overflow: 'hidden' }}>
+          <Typography variant="subtitle1">AI 生成 SQL</Typography>
+          <TextField multiline minRows={6} value={instruction} onChange={e => setInstruction(e.target.value)} placeholder="用自然语言描述你的查询需求" />
+          <Stack direction="row" spacing={1}>
+            <Button variant="contained" startIcon={<BoltIcon />} onClick={askAI} disabled={generateMutation.isPending}>生成</Button>
+            <Button onClick={insertGenerated} disabled={!generateMutation.data}>插入到编辑器</Button>
+          </Stack>
+          <Box sx={{ flex: 1, border: '1px solid #eee', borderRadius: 1, p: 1, overflow: 'auto' }}>
+            <Typography variant="caption" color="text.secondary">候选 SQL</Typography>
+            <pre style={{ whiteSpace: 'pre-wrap' }}>{generateMutation.data?.sql || ''}</pre>
+          </Box>
+
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="subtitle1">已保存查询</Typography>
+          <Box sx={{ overflow: 'auto', flex: 1 }}>
+            {(savedList || []).map((q: any) => (
+              <Box key={q.id} sx={{ border: '1px solid #eee', borderRadius: 1, p: 1, mb: 1, cursor: 'pointer' }} onClick={() => editorRef.current?.setValue(q.sqlText)}>
+                <Typography fontWeight={600}>{q.title}</Typography>
+                <Typography variant="body2" color="text.secondary">{q.description}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Container>
+    </Box>
+  )
+}

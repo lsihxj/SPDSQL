@@ -1,0 +1,253 @@
+.dndflow {
+  flex-direction: column;
+  display: flex;
+  height: 100%;
+}
+
+.dndflow aside {
+  border-right: 1px solid #e6eaf5;
+  padding: 16px 12px;
+  font-size: 12px;
+  background: linear-gradient(180deg, #f9fbff 0%, #f3f6fd 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* 独立的工作流侧栏样式，确保填满父容器宽度 */
+.workflow-aside {
+  border-right: 1px solid #e6eaf5;
+  padding: 16px 12px;
+  font-size: 12px;
+  background: linear-gradient(180deg, #f9fbff 0%, #f3f6fd 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.dndflow aside .aside-footer {
+  margin-top: auto;
+}
+
+.dndflow aside .description {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.dndflow .dndnode {
+  height: 44px;
+  width: 86%;
+  margin: 0 auto 12px;
+  padding: 8px 10px;
+  border: 1px solid #c8d1e5;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.dndflow .dndnode.input { border-color: #7aa2ff; background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%); }
+.dndflow .dndnode.output { border-color: #9cc2ff; background: linear-gradient(180deg, #f7fbff 0%, #eef5ff 100%); }
+.dndflow .dndnode.llm { border-color: #ff9b7a; background: linear-gradient(180deg, #fff7f3 0%, #ffefe7 100%); }
+.dndflow .dndnode.condition { border-color: #ffd47a; background: linear-gradient(180deg, #fffaf0 0%, #fff3d9 100%); }
+.dndflow .dndnode.api { border-color: #7ab8ff; background: linear-gradient(180deg, #f7fbff 0%, #e7f2ff 100%); }
+.dndflow .dndnode.db { border-color: #79d68f; background: linear-gradient(180deg, #f5fff7 0%, #eaffef 100%); }
+
+.dndflow .reactflow-wrapper {
+  flex-grow: 1;
+  height: 100%;
+}
+
+/* 自定义工作流节点与把手样式 */
+.wf-edge-del { border: 1px solid #c8d1e5; background: #fff; border-radius: 10px; font-size: 12px; width: 18px; height: 18px; cursor: pointer; line-height: 14px; }
+.wf-edge-del:hover { background: #ffecec; border-color: #f5b5b5; }
+/* 删除确认样式不再使用，保留可选 */
+.wf-pop { display: none; }
+.wf-pop-text { display: none; }
+.wf-pop-btn { display: none; }
+.wf-pop-btn.danger { display: none; }
+
+/* 右键上下文菜单 */
+.wf-context-menu {
+  position: fixed;
+  z-index: 3000;
+  min-width: 200px;
+  background: rgba(255,255,255,0.98);
+  backdrop-filter: saturate(120%) blur(6px);
+  border: 1px solid #c8d1e5;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15,23,42,.12);
+  padding: 6px;
+  user-select: none;
+}
+.wf-menu-item {
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.wf-menu-item:hover {
+  background: #eef3ff;
+}
+.wf-menu-tip {
+  font-size: 11px;
+  color: #667;
+  padding: 6px 8px 2px;
+}
+.wf-node {
+  background: transparent;
+  border: none;
+  position: relative;
+  overflow: visible; /* 允许把手在节点外侧显示 */
+}
+.wf-card {
+  width: 180px;
+  border: 1px solid #c8d1e5;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  position: relative;
+  z-index: 1; /* 卡片层级低于把手 */
+}
+.wf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: #f7f9fc;
+  border-bottom: 1px solid #e3e8f7;
+  cursor: default; /* 顶部为常规箭头 */
+}
+.wf-title { 
+  font-size: 12px;
+  font-weight: 600;
+  user-select: none;
+}
+.wf-settings-btn, .wf-delete-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.wf-delete-btn { color: #c33; }
+.wf-settings-btn:hover, .wf-delete-btn:hover { background: #eef3ff; }
+.wf-body {
+  padding: 10px 8px;
+  min-height: 48px;
+  cursor: move; /* 底部区域为移动样式 */
+}
+.wf-model {
+  font-size: 12px;
+  color: #555;
+}
+.wf-node-input {
+  width: 120px;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+.wf-handle {
+  width: 16px !important;
+  height: 16px !important;
+  background: #fff !important;
+  border: 2px solid #8aa0ff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.1);
+  cursor: crosshair !important; /* 把手为十字 */
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  z-index: 5; /* 确保把手不被卡片遮挡 */
+}
+/* 将把手中心对齐到边线 */
+.wf-handle-left {
+  left: -8px !important; /* 一半在外，一半在内（直径16px） */
+  transform: translate(0, -50%) !important;
+}
+.wf-handle-right {
+  right: -8px !important; /* 一半在外，一半在内 */
+  transform: translate(0, -50%) !important;
+}
+.wf-handle::before,
+.wf-handle::after {
+  content: '';
+  position: absolute;
+  background: #8aa0ff;
+  transition: background-color .15s ease;
+}
+.wf-handle::before {
+  width: 8px;
+  height: 2px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.wf-handle::after {
+  width: 2px;
+  height: 8px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* 悬停/聚焦时反转颜色 */
+.wf-handle:hover,
+.wf-handle:focus-visible {
+  background: #8aa0ff !important;
+  border-color: #8aa0ff !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,.18);
+}
+.wf-handle:hover::before,
+.wf-handle:hover::after,
+.wf-handle:focus-visible::before,
+.wf-handle:focus-visible::after {
+  background: #fff;
+}
+
+.dndflow .selectall {
+  margin-top: 10px;
+}
+
+@media screen and (min-width: 768px) {
+  .dndflow {
+    flex-direction: row;
+  }
+
+  .dndflow aside {
+    width: 22%;
+    max-width: 280px;
+  }
+  /* 工作流侧栏在大屏下也保持填满父容器（由父容器控制宽度） */
+  .workflow-aside {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* 画布空白区域为“手形”可拖拽/缩放 */
+.react-flow__pane {
+  cursor: grab;
+}
+.react-flow__pane:active {
+  cursor: grabbing;
+}
+
+/* 右侧已保存列表 */
+.wf-saved-list { padding: 8px 0; }
+.wf-saved-item { background: #fff; border: 1px solid #e3e8f7; border-radius: 10px; padding: 10px 12px; box-shadow: 0 2px 8px rgba(15,23,42,.06); display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.wf-saved-item .wf-name { font-weight: 600; color: #1e88e5; }
+.wf-saved-item .wf-actions { display: flex; gap: 8px; }
+.wf-saved-action { border: none; background: transparent; color: #1e88e5; padding: 0; cursor: pointer; }
+.wf-saved-action:hover { text-decoration: underline; }
+
+/* 运行中脉冲动画（供 WorkflowNode.tsx 使用） */
+@keyframes wf-pulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}

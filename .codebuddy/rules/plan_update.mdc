@@ -1,0 +1,13 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-10-30T11:06:35.349Z
+provider: 
+---
+
+- 当用户提出与《计划》相关的需求或任务完成时，必须更新 <plan_info> 的 JSON 内容（features/design/plan/coreFiles 等部分）。
+- 修改计划时应保持与已有结构一致，不要移除既有字段，除非明确说明删除。
+- 任务状态仅使用 done/doing/holding 三种。
+- 若核心文件被删除，需从 coreFiles 中移除。
+- 更新《计划》后无需重复说明更新过程，只需贯彻到后续实现。

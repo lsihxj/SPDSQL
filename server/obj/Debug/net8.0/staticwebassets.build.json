@@ -1,0 +1,19 @@
+{
+  "Version": 1,
+  "Hash": "lPCQADdD/xwfeP9MFU9DVqLUV9Im+lnUKcH8akUUD2A=",
+  "Source": "SPDSQL.Server",
+  "BasePath": "_content/SPDSQL.Server",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "SPDSQL.Server\\wwwroot",
+      "Source": "SPDSQL.Server",
+      "ContentRoot": "D:\\CodeBuddy\\SPDSQL\\server\\wwwroot\\",
+      "BasePath": "_content/SPDSQL.Server",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": []
+}

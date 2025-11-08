@@ -1,0 +1,14 @@
+---
+description: 
+alwaysApply: false
+enabled: true
+updatedAt: 2025-10-25T07:00:13.990Z
+provider: 
+---
+
+ERD 交互修复与增强约定
+
+- Edge 上支持右键菜单，提供“删除连接线”操作，事件通过 window 级别 CustomEvent(`edge-context`) 上报，容器负责渲染 MUI Menu。
+- 字段列表滚动时，连接手柄采用绝对定位的叠加层，位置以每行中心计算并在 scroll/resize 时节流更新，避免闪烁。
+- 当鼠标悬停字段时，显示左右半圆可点区域，指示可进行连线操作；实际连线仍依赖 ReactFlow `Handle`（透明），半圆仅作视觉与可点击辅助。
+- 防抖/帧节流：行中心位计算通过 requestAnimationFrame 合并更新，减少抖动与多次 setState。

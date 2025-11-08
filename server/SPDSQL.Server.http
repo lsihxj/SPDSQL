@@ -1,0 +1,29 @@
+@server = http://localhost:5087
+
+### Execute SQL
+POST {{server}}/api/sql/execute
+Content-Type: application/json
+
+{
+  "sqlText": "select 1 as id, 'hello' as text;",
+  "readOnly": true,
+  "maxRows": 100,
+  "timeoutSeconds": 10
+}
+
+### Generate SQL
+POST {{server}}/api/sql/generate
+Content-Type: application/json
+
+{
+  "instruction": "查询最近30天内的订单数量和总金额，按天汇总"
+}
+
+### Diagnose
+POST {{server}}/api/sql/diagnose
+Content-Type: application/json
+
+{
+  "sql": "select * from non_exist_table",
+  "error": "relation \"non_exist_table\" does not exist"
+}

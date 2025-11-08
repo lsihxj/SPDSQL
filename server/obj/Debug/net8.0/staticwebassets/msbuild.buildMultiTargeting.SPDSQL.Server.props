@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\SPDSQL.Server.props" />
+</Project>

@@ -1,0 +1,17 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-10-27T06:32:37.252Z
+provider: 
+---
+
+# CloudStudio Deployment Rules
+
+- Use CloudStudio deployment only when the user explicitly asks to deploy to CloudStudio.
+- Use the cloud_studio_deploy_sandbox tool to deploy the web project.
+- Do not create fake files to bypass deployment failures; analyze errors seriously and find proper solutions.
+- If deployment fails multiple times, ask the user for permission before trying again.
+- Always cd to the project directory before executing commands.
+- Prefer absolute paths when running commands.
+- Do not use local file paths on the remote server; use /workspace as the root.

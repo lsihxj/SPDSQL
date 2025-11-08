@@ -1,0 +1,24 @@
+{
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "monaco-editor-webpack-plugin": "^7.1.1",
+    "vite-plugin-monaco-editor": "^1.1.0"
+  },
+  "dependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-modal": "^3.16.3",
+    "dompurify": "^3.3.0",
+    "github-markdown-css": "^5.5.1",
+    "highlight.js": "^11.11.1",
+    "marked": "^16.4.1",
+    "monaco-editor": "^0.52.2",
+    "react-markdown": "^10.1.0",
+    "react-modal": "^3.16.3",
+    "reactflow": "^11.11.4",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1"
+  },
+  "overrides": {
+    "dompurify@<3.2.4": "^3.3.0"
+  }
+}

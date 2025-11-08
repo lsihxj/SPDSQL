@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SPDSQL.Server</name>
+    </assembly>
+    <members>
+        <member name="T:SPDSQL.Server.Controllers.QueriesController">
+            <summary>
+            查询管理控制器
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.SchemaDocsController">
+            <summary>
+            Schema文档管理控制器
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SchemaDocsController.List(System.Threading.CancellationToken)">
+            <summary>
+            获取所有Schema文档
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SchemaDocsController.Update(SPDSQL.Server.Models.SchemaDoc,System.Threading.CancellationToken)">
+            <summary>
+            更新特定表的Schema文档
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SchemaDocsController.AutoGenerate(System.String,System.Threading.CancellationToken)">
+            <summary>
+            从数据库自动生成Schema文档
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SchemaDocsController.Delete(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            删除Schema文档
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.SqlController">
+            <summary>
+            SQL 执行控制器
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SqlController.Execute(SPDSQL.Server.Controllers.ExecuteRequest)">
+            <summary>
+            执行 SQL 语句
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SqlController.Generate(SPDSQL.Server.Controllers.GenerateRequest)">
+            <summary>
+            AI 生成 SQL
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SqlController.Diagnose(SPDSQL.Server.Controllers.DiagnoseRequest)">
+            <summary>
+            诊断 SQL 错误并返回修正建议
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.ExecuteRequest">
+            <summary>
+            执行请求
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.ExecuteResponse">
+            <summary>
+            执行响应（旧格式，保持向后兼容）
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.MultiExecuteResponse">
+            <summary>
+            多查询执行响应
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.QueryResult">
+            <summary>
+            单个查询结果
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.GenerateRequest">
+            <summary>
+            生成请求
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.GenerateResponse">
+            <summary>
+            生成响应
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.DiagnoseRequest">
+            <summary>
+            诊断请求
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Controllers.DiagnoseResponse">
+            <summary>
+            诊断响应
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Controllers.SqlOptimizeController.Optimize(SPDSQL.Server.Controllers.OptimizeRequest,System.Threading.CancellationToken)">
+            <summary>
+            AI 对 SQL 进行语法与性能检查并给出优化建议
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:SPDSQL.Server.Migrations.AddUsers">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Migrations.AddUsers.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Migrations.AddUsers.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Migrations.AddUsers.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.GenerateSqlAsync(System.String,SPDSQL.Server.Controllers.ModelConfig,System.Collections.Generic.Dictionary{System.String,System.String},System.Threading.CancellationToken)">
+            <summary>
+            根据用户指令生成 SQL（非流式）
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.DiagnoseSqlAsync(System.String,System.String,SPDSQL.Server.Controllers.ModelConfig,System.Collections.Generic.Dictionary{System.String,System.String},System.Threading.CancellationToken)">
+            <summary>
+            诊断 SQL 错误并返回修正建议
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.GetSchemaContextAsync(System.Threading.CancellationToken)">
+            <summary>
+            获取数据库 Schema 上下文
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.OptimizeSqlAsync(System.String,SPDSQL.Server.Controllers.ModelConfig,System.Collections.Generic.Dictionary{System.String,System.String},System.Threading.CancellationToken)">
+            <summary>
+            AI 优化：语法检查与性能建议，返回结构化结果
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.StreamGenerateSqlAsync(System.String,SPDSQL.Server.Controllers.ModelConfig,System.Collections.Generic.Dictionary{System.String,System.String},System.Func{System.String,System.Threading.Tasks.Task},System.Threading.CancellationToken)">
+            <summary>
+            生成 SQL（流式）：构造与 GenerateSqlAsync 相同的提示词并进行流式回调
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.CallChatAsync(System.String,System.String,SPDSQL.Server.Services.OpenAIOptions,System.Double,System.Threading.CancellationToken)">
+            <summary>
+            调用大模型 API（支持每次调用覆盖 BaseUrl/API Key/Model/Temperature）
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.AiService.CleanSqlResponse(System.String)">
+            <summary>
+            清理 AI 返回的 SQL，移除 markdown 格式
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlExecutionService.ExecuteMultipleAsync(SPDSQL.Server.Controllers.ExecuteRequest,System.Threading.CancellationToken)">
+            <summary>
+            执行多条SQL语句，返回每条语句的执行结果
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlExecutionService.ExecuteSingleStatementAsync(Npgsql.NpgsqlConnection,System.String,SPDSQL.Server.Controllers.ExecuteRequest,System.Int32,Npgsql.NpgsqlTransaction,System.Threading.CancellationToken)">
+            <summary>
+            执行单条SQL语句
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlExecutionService.ValidateSql(System.String,System.Boolean)">
+            <summary>
+            验证 SQL 是否符合只读模式限制
+            </summary>
+        </member>
+        <member name="T:SPDSQL.Server.Services.SqlParser">
+            <summary>
+            SQL解析器，用于将多条SQL语句按分号分割，同时处理字符串、注释等特殊上下文
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlParser.ParseStatements(System.String)">
+            <summary>
+            解析SQL文本，返回独立的SQL语句列表
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlParser.IsEscaped(System.String,System.Int32)">
+            <summary>
+            检查字符是否被转义
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlParser.ExtractDollarTag(System.String,System.Int32)">
+            <summary>
+            提取dollar-quoted字符串的标签（如 $$ 或 $tag$）
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlParser.IsOnlyComment(System.String)">
+            <summary>
+            判断语句是否只包含注释和空白
+            </summary>
+        </member>
+        <member name="M:SPDSQL.Server.Services.SqlParser.RemoveComments(System.String)">
+            <summary>
+            移除SQL中的注释
+            </summary>
+        </member>
+    </members>
+</doc>
